@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<title>web页面</title>
+	<style media="screen">
+		button {
+			margin-top: 50px;
+			margin-left: 30px;
+		}
+	</style>
+
+	<script type="text/javascript">
+		function setupWebViewJavascriptBridge(callback) {
+			if (window.WebViewJavascriptBridge) {
+				return callback(WebViewJavascriptBridge);
+			}
+			if (window.WVJBCallbacks) {
+				return window.WVJBCallbacks.push(callback);
+			}
+			window.WVJBCallbacks = [callback];
+			var WVJBIframe = document.createElement('iframe');
+			WVJBIframe.style.display = 'none';
+			WVJBIframe.src = 'https://__bridge_loaded__';
+			document.documentElement.appendChild(WVJBIframe);
+			setTimeout(function() {
+				document.documentElement.removeChild(WVJBIframe)
+			}, 0)
+		}
+
+		setupWebViewJavascriptBridge(function(bridge) {
+            /*原生调用我的方法，我来注册了一个名叫“showHtmlAlert”的方法供他调用*/
+			bridge.registerHandler('showHtmlAlert', function(data, responseCallback) {
+                /*H5的弹框，弹出原生传递过来的信息*/
+                alert(data.message);
+				responseCallback(data)
+			})
+                                     
+			//点击H5上面的按钮，去掉用原生的方法
+			var callNative = document.getElementById('callNative');
+			callNative.onclick = function () {
+				//去调用原生注册的“showNativeAlert”
+				bridge.callHandler('showNativeAlert', {
+					'message': 'H5调用了原生的方法'
+				}, function responseCallback(responseData) {
+
+				})
+			}
+         })
+	</script>
+</head>
+
+<body>
+	<button type="button" name="button" id="callNative";>我是H5的button，点我，点我</button>
+</body>
+
+</html>
